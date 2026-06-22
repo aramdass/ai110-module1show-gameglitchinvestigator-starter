@@ -25,28 +25,34 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📝 Document Your Experience
 
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
+- [x] **Game's purpose:** A Streamlit number-guessing game. The player guesses a secret number within a difficulty-based range and a limited number of attempts, guided by "higher/lower" hints; the score rewards winning in fewer attempts.
+- [x] **Bugs found:** hints pointed the wrong direction; the secret was cast to a string on even attempts, so the hint flipped on repeated identical guesses; "New Game" didn't reset `status`/`score`/`history`, leaving a finished game stuck; the "Attempts left" count was off by one; the range text was hardcoded to "1 and 100"; "Hard" had a narrower range than "Normal"; the attempts allowed didn't decrease with difficulty (Normal granted more than Easy), so the limit felt random; the scoring rewarded some wrong guesses; and `logic_utils.py` was unimplemented, so `pytest` couldn't run.
+- [x] **Fixes applied:** mapped each outcome to a corrected hint message; removed the even-attempt string cast so guesses are always compared as integers; made "New Game" reset all session state; initialized `attempts` to 0 and rendered "Attempts left" through an `st.empty()` placeholder that refreshes after each guess is counted, so the count no longer trails by one; displayed the real difficulty range; widened "Hard" to 1–100; set the attempts allowed to decrease with difficulty (Easy 10, Normal 7, Hard 5); made scoring consistent (wins scale with attempts, every wrong guess is a flat −5); and refactored all four logic functions into `logic_utils.py`, with `check_guess` returning a single outcome string so the tests pass.
 
 ## 📸 Demo Walkthrough
 
-Describe your fixed game in numbered steps so a reader can follow along without watching a video:
+A sample game on **Normal** difficulty (range 1–50, 7 attempts, secret = 32):
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. **Start.** The info bar reads "Guess a number between 1 and 50. Attempts left: 7" and the score is 0.
+2. **Guess `25`** → the secret is higher, so the hint reads "📈 Go HIGHER!" (Too Low). Attempts left: 6, score: −5.
+3. **Guess `40`** → the secret is lower, so the hint reads "📉 Go LOWER!" (Too High). Attempts left: 5, score: −10.
+4. **Guess `32`** → "🎉 Correct!" with balloons and "You won! The secret was 32." The win adds 100 − 10 × (3 − 1) = 80 points, for a final score of 70, and the status becomes "won".
+5. **Click "New Game"** → attempts, score, history, and status all reset, a fresh secret is drawn from the selected difficulty's range, and play starts over.
 
 **Screenshot** *(optional)*: <!-- Insert a screenshot of your fixed, winning game here -->
 
 ## 🧪 Test Results
 
 ```
-# Paste your pytest output here, e.g.:
-# pytest tests/
-# ========================= X passed in 0.XXs =========================
+$ python -m pytest tests/ -v
+============================= test session starts ==============================
+collected 3 items
+
+tests/test_game_logic.py::test_winning_guess PASSED                      [ 33%]
+tests/test_game_logic.py::test_guess_too_high PASSED                     [ 66%]
+tests/test_game_logic.py::test_guess_too_low PASSED                      [100%]
+
+============================== 3 passed in 0.03s ===============================
 ```
 
 ## 🚀 Stretch Features
